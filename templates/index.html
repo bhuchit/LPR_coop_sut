@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"></script>
+<style>
+  /* ========== Table ========== */
+table {
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+table, td, th {
+    border: 2px solid #000000;
+    text-align: left;
+    padding: 8px;
+}
+tr:nth-child(even) {
+    background-color: #ffffff;
+}
+/* ========================== */
+/* ===== Nevigetion Bar ===== */
+ul {
+    list-style-type: none;
+    margin: 0;
+    /* position: fixed; */
+    width: 100%;
+    padding: 0;
+    overflow: hidden;
+    background-color:#13CA91;
+}
+li a:hover {
+    background-color:#FF9472;
+} 
+li {
+    float: left;
+}
+li a {
+    display: block;
+    color: white;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+/* ========================== */
+body {
+    position: relative;
+    /* background-color: #F9F7E8; */
+    background-image:url('/static/image_test/bg-home4.gif');
+    background-repeat:repeat; 
+}
+.img-container {
+    text-align: center;
+    background-color: black;
+}
+
+</style>
+</head>
+<body data-spy="scroll" data-target=".navbar" data-offset="50">
+<ul>
+  <li><a style="color:black" href="/">HOME</a></li>
+  <li><a style="color:black" href="#cctv">CCTV MONITOR</a></li>
+  <li><a style="color:black" href="#beta">BETA</a></li>
+  <!-- <li><a style="color:black" href="#about">CONTACT</a></li> -->
+</ul>
+
+<div id="cctv" class="container mt-3">
+  <h2>[CCTV Monitor]</h2>
+  {% for x in datas1 %}
+  <form class="form-inline" action="/cctv_rtsp" method="POST">
+    <label for="streamLink" class="mb-2 mr-sm-2"><h6>Enter your RTSP : </h6></label>
+    <input type="hidden" name="objId" value="{{x._id}}">
+    <input type="text" class="form-control mb-2 mr-sm-2"  style="width: 80%;" placeholder="rtsp://..." name="stream_src" value="{{x.rtsp}}">    
+    <button type="submit" class="btn btn-primary mb-2"><ion-icon name="caret-forward-circle-outline"></ion-icon>Submit</button>
+  </form>
+  <table class="table table-hover" bgcolor="#fffff1">
+    <thead class="" bgcolor="#13CA91">
+    <tr>
+      <th>ID</th>
+      <th>RTSP</th>
+      <!-- <th>Action</th> -->
+    </tr>
+    </thead>
+    
+    <tbody>
+    <tr>
+      <td>{{x._id}}</td>
+      <td>{{x.rtsp}}</td>
+    </tr>
+    </tbody>
+  {% endfor %}
+  </table>
+  <div class="img-container" >
+    <img id="#video" src="{{ url_for('video_feed') }}" height="518" width="768">
+  </div>
+  <div class="container mt-3" style="text-align: center;">
+    <h5>Start: start video stream, Stop: stop video stream</h5>
+    <a href="/start_stream" style="color:white" class="btn btn-info">Start</a>
+    <a href="/stop_stream" style="color:white" class="btn btn-info">Stop</a>
+  </div> 
+</div>
+
+<div id="table" class="container mt-3">
+  <h2 class="text-black">[Licanse Plates Table]</h2>
+  <table class="table table-hover" style="background-color: #f1f1f1;">
+    <thead class="" style="background-color: #13CA91;">
+    <tr>
+      <th>ID</th>
+      <th>License Plate</th>
+      <th>Province</th>
+      <th>Brand</th>
+      <th>Color</th>
+      <th>Detection Status</th>
+      <th>Detected Timestamp</th>
+      <th>Action</th>
+    </tr>
+    </thead>
+    {%for x in datas%}
+    <tbody>
+    <tr>
+      <td>{{x._id}}</td>
+      <td>{{x.plate}}</td>
+      <td>{{x.province}}</td>
+      <td>{{x.brand}}</td>
+      <td>{{x.color}}</td>
+      <td>{{x.detection_status}}</td>
+      <td>{{x.detected_dateTime}}</td>
+      <td>
+        <a href="" style="color:white" class="btn btn-warning" data-toggle="modal" data-target="#modalEdit{{x._id}}">Edit</a>
+        <a href="/delete/{{x._id}}" style="color:white" class="btn btn-danger" methods="delete" onclick="return confirm('คุณต้องการลบข้อมูลหรือไม่?')">Delete</a>    
+      </td>
+    </tr>
+    </tbody>
+    <!-- ================================================ UPDATE FORM ==================================================== -->
+    <div id="modalEdit{{x._id}}" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Update License Plate</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form action="/update_lp" method="POST">
+              <div class="form-group">
+                <label>License Plate:</label>
+                <input type="hidden" name="objId" value="{{x._id}}">
+                <input type="text" class="form-control" name="plate" value="{{x.plate}}">
+              </div>
+              <div class="form-group">
+                <label>Province:</label>
+                <input type="text" class="form-control" name="province" value="{{x.province}}">
+              </div>
+              <div class="form-group">
+                <label>Brand:</label>
+                <input type="text" class="form-control" name="brand" value="{{x.brand}}">
+              </div>
+              <div class="form-group">
+                <label>Color:</label>
+                <input type="text" class="form-control" name="color" value="{{x.color}}">
+              </div>
+              <div class="form-group">
+                <button class="btn btn-primary" type="submit">Update</button>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger img-container" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+    <!-- ================================================ ADD NEW FORM ==================================================== -->
+    <div id="modalAdd" class="modal fade" role="dialog">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h4 class="modal-title">Add New License Plate</h4>
+            <button type="button" class="close" data-dismiss="modal">&times;</button>
+          </div>
+          <div class="modal-body">
+            <form action="/insert_lp" method="POST">
+              <div class="form-group">
+                  <label for="l_plate">License Plate</label>
+                  <input type="text" class="form-control"  name="plate">
+              </div>
+              <div class="form-group">
+                  <label for="l_plate">Province</label>
+                  <input type="text" class="form-control"  name="province">
+              </div>
+              <div class="form-group">
+                <label for="l_plate">Brand</label>
+                <input type="text" class="form-control"  name="brand">
+              </div>
+              <div class="form-group">
+                <label for="l_plate">Color</label>
+                <input type="text" class="form-control"  name="color">
+              </div>
+            <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </table>
+  <a href=""  style="color:white" class="btn btn-info" data-toggle="modal" data-target="#modalAdd">Add+</a>
+</div>
+
+<div id="beta" class="container mt-3" >
+  <h2>[BETA]</h2>
+  <form method="POST" enctype="multipart/form-data" action="/uploader">
+    <div class="custom-file">
+      <input class="custom-file-input" type=file name=file>
+      <label class="custom-file-label" for="customFile">Choose file</label>
+    </div>
+    <div class="mt-3">
+      <input type=submit class="btn btn-info" value=Upload>
+    </div>
+  </form>
+</div>
+<!-- show img processed -->
+<div class="img-container mt-3"  id="myDIV">
+  This is my DIV element.
+</div>
+<div class="container mt-3"> 
+  <button class="btn btn-info " onclick="myFunction()">HIDE&SHOW</button>
+</div>
+
+
+
+<script>
+  // Add the following code if you want the name of the file appear on select
+  $(".custom-file-input").on("change", function() {
+    var fileName = $(this).val().split("\\").pop();
+    $(this).siblings(".custom-file-label").addClass("selected").html(fileName);
+  });
+
+// show img processed
+  function myFunction() {
+    var x = document.getElementById("myDIV");
+    if (x.style.display === "none") {
+      x.style.display = "block";
+    } else {
+      x.style.display = "none";
+    }
+  }
+</script>
+
+</body>
+</html>
